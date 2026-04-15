@@ -3,16 +3,8 @@
 import { useCallback, useEffect, useState } from "react";
 import SaleForm from "./components/SaleForm";
 import SalesTable from "./components/SalesTable";
-
-interface Sale {
-  id: number;
-  customer: string;
-  product: string;
-  amount: number;
-  score: number | null;
-}
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+import { API_URL, Sale } from "./types";
+import styles from "./page.module.css";
 
 export default function Home() {
   const [sales, setSales] = useState<Sale[]>([]);
@@ -35,10 +27,8 @@ export default function Home() {
   }, [fetchSales]);
 
   return (
-    <main style={{ maxWidth: 900, margin: "0 auto", padding: "2rem 1rem" }}>
-      <h1 style={{ fontSize: "1.5rem", fontWeight: 700, marginBottom: "1.5rem" }}>
-        Mini Sales App
-      </h1>
+    <main className={styles.main}>
+      <h1 className={styles.title}>Mini Sales App</h1>
       <SaleForm onCreated={fetchSales} />
       <SalesTable sales={sales} loading={loading} onEvaluated={fetchSales} />
     </main>

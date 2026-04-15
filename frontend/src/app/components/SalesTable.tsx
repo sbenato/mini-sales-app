@@ -1,15 +1,8 @@
 "use client";
 
 import ScoreSelector from "./ScoreSelector";
+import { Sale } from "../types";
 import styles from "./SalesTable.module.css";
-
-interface Sale {
-  id: number;
-  customer: string;
-  product: string;
-  amount: number;
-  score: number | null;
-}
 
 interface Props {
   sales: Sale[];

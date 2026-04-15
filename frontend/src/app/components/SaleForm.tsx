@@ -1,13 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { API_URL } from "../types";
 import styles from "./SaleForm.module.css";
 
 interface Props {
   onCreated: () => void;
 }
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
 
 export default function SaleForm({ onCreated }: Props) {
   const [customer, setCustomer] = useState("");
