@@ -1,0 +1,26 @@
+.container {
+  display: flex;
+  gap: 2px;
+}
+
+.star {
+  background: none;
+  font-size: 1.3rem;
+  color: var(--border);
+  padding: 0;
+  line-height: 1;
+  transition: color 0.15s, transform 0.15s;
+}
+
+.star:hover:not(:disabled) {
+  color: var(--warning);
+  transform: scale(1.2);
+}
+
+.star.active {
+  color: var(--warning);
+}
+
+.star:disabled {
+  opacity: 0.5;
+}
