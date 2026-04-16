@@ -1,0 +1,94 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test-api:
+    name: API Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Start services
+        run: docker compose up -d --build
+
+      - name: Wait for backend health
+        run: |
+          for i in $(seq 1 30); do
+            curl -sf http://localhost:4000/health && break
+            sleep 2
+          done
+
+      - name: Run API tests
+        run: |
+          # Create sales
+          curl -sf -X POST http://localhost:4000/api/sales \
+            -H 'Content-Type: application/json' \
+            -d '{"customer":"Test","product":"Widget","amount":100}' > /dev/null
+
+          # Verify list
+          COUNT=$(curl -sf http://localhost:4000/api/sales | python3 -c "import sys,json; print(len(json.load(sys.stdin)))")
+          [ "$COUNT" = "1" ] || (echo "FAIL: expected 1 sale, got $COUNT" && exit 1)
+
+          # Evaluate
+          SCORE=$(curl -sf -X POST http://localhost:4000/api/sales/1/evaluate \
+            -H 'Content-Type: application/json' \
+            -d '{"score":4}' | python3 -c "import sys,json; print(json.load(sys.stdin)['score'])")
+          [ "$SCORE" = "4" ] || (echo "FAIL: expected score 4, got $SCORE" && exit 1)
+
+          # Validation: empty customer
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X POST http://localhost:4000/api/sales \
+            -H 'Content-Type: application/json' -d '{"customer":"","product":"X","amount":10}')
+          [ "$STATUS" = "400" ] || (echo "FAIL: expected 400, got $STATUS" && exit 1)
+
+          # Validation: invalid score
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X POST http://localhost:4000/api/sales/1/evaluate \
+            -H 'Content-Type: application/json' -d '{"score":6}')
+          [ "$STATUS" = "400" ] || (echo "FAIL: expected 400, got $STATUS" && exit 1)
+
+          # Validation: sale not found
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X POST http://localhost:4000/api/sales/999/evaluate \
+            -H 'Content-Type: application/json' -d '{"score":3}')
+          [ "$STATUS" = "404" ] || (echo "FAIL: expected 404, got $STATUS" && exit 1)
+
+          echo "All API tests passed"
+
+      - name: Stop services
+        if: always()
+        run: docker compose down -v
+
+  test-ui:
+    name: UI Tests (Playwright)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Playwright
+        run: |
+          npm install -D @playwright/test
+          npx playwright install chromium --with-deps
+
+      - name: Start services
+        run: docker compose up -d --build
+
+      - name: Wait for services
+        run: |
+          for i in $(seq 1 30); do
+            curl -sf http://localhost:4000/health && curl -sf http://localhost:3000 > /dev/null && break
+            sleep 2
+          done
+
+      - name: Run Playwright tests
+        run: npx playwright test --reporter=list
+
+      - name: Stop services
+        if: always()
+        run: docker compose down -v

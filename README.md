@@ -1,5 +1,7 @@
 # Mini Sales App
 
+[![CI](https://github.com/sbenato/mini-sales-app/actions/workflows/ci.yml/badge.svg)](https://github.com/sbenato/mini-sales-app/actions/workflows/ci.yml)
+
 Aplicación web full stack para gestionar y evaluar ventas. Desarrollada como ejercicio técnico utilizando IA como herramienta principal de desarrollo (Claude Code).
 
 ## Quick Start
@@ -110,10 +112,14 @@ Los datos de SQLite se almacenan en un volume nombrado. Persisten entre reinicio
 **WAL mode en SQLite:**
 `PRAGMA journal_mode = WAL` permite lecturas concurrentes sin bloqueo. Buena práctica incluso en apps simples.
 
+**CI con GitHub Actions:**
+Pipeline automático que corre tests de API y UI en paralelo en cada push/PR. Si algo falla, no se mergea. El badge en el README muestra el estado actual.
+
 ## Estructura del Proyecto
 
 ```
 mini-sales-app/
+├── .github/workflows/ci.yml       # CI pipeline (GitHub Actions)
 ├── docker-compose.yml
 ├── run-tests.sh                    # Suite completa de tests
 ├── playwright.config.ts
