@@ -1,0 +1,16 @@
+{
+  "name": "mini-sales-app",
+  "version": "1.0.0",
+  "description": "Aplicación web full stack para gestionar y evaluar ventas.",
+  "main": "index.js",
+  "scripts": {
+    "test": "./run-tests.sh"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@playwright/test": "^1.59.1"
+  }
+}
